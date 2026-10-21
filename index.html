@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var currentFetch = window.fetch;
+          var desc = Object.getOwnPropertyDescriptor(window, 'fetch') || Object.getOwnPropertyDescriptor(Window.prototype, 'fetch');
+          if (!desc || (!desc.set && desc.configurable !== false)) {
+            Object.defineProperty(window, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: function () {
+                return currentFetch;
+              },
+              set: function (fn) {
+                if (typeof fn === 'function') {
+                  currentFetch = fn;
+                }
+              }
+            });
+          }
+        } catch (_e) {}
+
+        window.addEventListener(
+          'error',
+          function (event) {
+            var msg = String((event && event.message) || '');
+            var file = String((event && event.filename) || '');
+            if (
+              msg.indexOf('Cannot set property fetch') !== -1 ||
+              file.indexOf('chrome-extension://') === 0 ||
+              file.indexOf('moz-extension://') === 0
+            ) {
+              event.stopImmediatePropagation();
+              event.preventDefault();
+            }
+          },
+          true
+        );
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hospital Residential Allocation & Management System - শহীদ সৈয়দ নজরুল ইসলাম মেডিকেল কলেজ হাসপাতাল, কিশোরগঞ্জ</title>
+    <meta name="description" content="শহীদ সৈয়দ নজরুল ইসলাম মেডিকেল কলেজ হাসপাতাল, কিশোরগঞ্জ - সরকারি আবাসিক কোয়ার্টার, ভবন, কক্ষ, বাসিন্দা, বরাদ্দ ও বাতিল ব্যবস্থাপনা সিস্টেম।" />
+    <meta property="og:title" content="Hospital Residential Allocation & Management System - শহীদ সৈয়দ নজরুল ইসলাম মেডিকেল কলেজ হাসপাতাল, কিশোরগঞ্জ" />
+    <meta property="og:description" content="শহীদ সৈয়দ নজরুল ইসলাম মেডিকেল কলেজ হাসপাতাল, কিশোরগঞ্জ - সরকারি আবাসিক কোয়ার্টার, ভবন, কক্ষ, বাসিন্দা, বরাদ্দ ও বাতিল ব্যবস্থাপনা সিস্টেম।" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" crossorigin="anonymous">
+  </head>
+  <body class="bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

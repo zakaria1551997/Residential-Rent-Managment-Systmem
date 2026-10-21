@@ -1,0 +1,34 @@
+{
+  "appId": "com.ssnimch.residential.management",
+  "productName": "Hospital Residential Allocation & Management System",
+  "copyright": "Copyright © 2026 শহীদ সৈয়দ নজরুল ইসলাম মেডিকেল কলেজ হাসপাতাল, কিশোরগঞ্জ",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64",
+          "ia32"
+        ]
+      }
+    ],
+    "icon": "public/favicon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": true,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "SSNIMCH Residential Allocation System",
+    "installerLanguages": ["English", "Bengali"]
+  }
+}

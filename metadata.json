@@ -1,0 +1,6 @@
+{
+  "name": "Hospital Residential Allocation & Management System",
+  "description": "শহীদ সৈয়দ নজরুল ইসলাম মেডিকেল কলেজ হাসপাতাল, কিশোরগঞ্জ - সরকারি আবাসিক কোয়ার্টার, ভবন, কক্ষ, বাসিন্দা, বরাদ্দ ও বাতিল ব্যবস্থাপনা সিস্টেম।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
