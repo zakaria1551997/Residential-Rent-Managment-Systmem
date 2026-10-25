@@ -20,6 +20,13 @@ import {
   shouldShowRoomTypeField,
   normalizeNarasundaRoomType
 } from './src/logic/rules.ts';
+import {
+  initPostgresSchema,
+  saveStateToPostgres,
+  loadStateFromPostgres,
+  testPostgresConnection,
+  getPostgresConfig
+} from './src/db/postgres.ts';
 import type {
   Building,
   Room,
@@ -240,6 +247,11 @@ function saveCentralDB(state: CentralDatabaseState): void {
   const tempPath = `${CENTRAL_DB_PATH}.tmp`;
   fs.writeFileSync(tempPath, JSON.stringify(state, null, 2), 'utf-8');
   fs.renameSync(tempPath, CENTRAL_DB_PATH);
+
+  // Asynchronously replicate to PostgreSQL if connected
+  saveStateToPostgres(state).catch((err) => {
+    // Non-blocking background catch
+  });
 }
 
 // Mutex transaction queue for concurrent multi-client safety
@@ -282,8 +294,9 @@ async function startServer() {
   });
 
   // 1. Health & LAN Diagnostics Endpoint
-  app.get('/api/v1/health', (req, res) => {
+  app.get('/api/v1/health', async (req, res) => {
     const db = loadCentralDB();
+    const pgStatus = await testPostgresConnection();
     res.json({
       status: 'OK',
       service: 'SSNIMCH Residential Allocation Central Server',
@@ -292,6 +305,16 @@ async function startServer() {
       uptimeSeconds: Math.round(process.uptime()),
       lanAddresses: getLanAddresses(),
       port: PORT,
+      database: {
+        engine: 'PostgreSQL',
+        connected: pgStatus.success,
+        host: pgStatus.host,
+        port: pgStatus.port,
+        name: pgStatus.database,
+        user: pgStatus.user,
+        message: pgStatus.message,
+        fallbackMode: !pgStatus.success ? 'local_json_active' : 'primary_postgresql'
+      },
       counts: {
         buildings: db.buildings.length,
         rooms: db.rooms.length,
@@ -299,6 +322,26 @@ async function startServer() {
         activeAllocations: db.allocations.filter(a => a.status === 'ACTIVE').length,
         pendingCancellations: db.cancellations.filter(c => c.status === 'PENDING_APPROVAL').length
       }
+    });
+  });
+
+  // 1.1 PostgreSQL Database Diagnostics & Manual Test
+  app.get('/api/v1/database/status', async (req, res) => {
+    const pgStatus = await testPostgresConnection();
+    res.json({
+      engine: 'PostgreSQL',
+      ...pgStatus
+    });
+  });
+
+  app.post('/api/v1/database/sync', async (req, res) => {
+    const current = loadCentralDB();
+    const success = await saveStateToPostgres(current);
+    res.json({
+      success,
+      message: success
+        ? 'কেন্দ্রীয় ডাটাবেজ সফলভাবে PostgreSQL-এ সিঙ্ক হয়েছে।'
+        : 'PostgreSQL সংযোগ না থাকায় লোকাল ফাইলে সংরক্ষিত রইল।'
     });
   });
 
@@ -400,8 +443,19 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT, '0.0.0.0', async () => {
     console.log(`[SSNIMCH SERVER] Central Backend & Web Client listening on http://0.0.0.0:${PORT}`);
+    // Initialize PostgreSQL schema in background
+    try {
+      const pgReady = await initPostgresSchema();
+      if (pgReady) {
+        console.log('[SSNIMCH SERVER] PostgreSQL Connected & Schemas Synchronized.');
+      } else {
+        console.log('[SSNIMCH SERVER] PostgreSQL not reachable on localhost:5432. Standby JSON file persistence active.');
+      }
+    } catch (e: any) {
+      console.warn('[SSNIMCH SERVER] Notice: Operating in local JSON mode:', e.message);
+    }
   });
 }
 

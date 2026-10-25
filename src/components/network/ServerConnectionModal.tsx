@@ -147,6 +147,54 @@ export const ServerConnectionModal: React.FC<ServerConnectionModalProps> = ({
           </div>
         </div>
 
+        {/* PostgreSQL Database Integration Status */}
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <Server className="w-4 h-4 text-teal-700" />
+              <span>PostgreSQL ডাটাবেজ কনফিগারেশন ও স্থিতি</span>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/v1/database/status');
+                  const data = await res.json();
+                  alert(data.message || (data.success ? 'PostgreSQL ডাটাবেজ সফলভাবে সংযুক্ত!' : 'PostgreSQL সংযোগ ব্যর্থ।'));
+                } catch (e: any) {
+                  alert('ডাটাবেজ স্ট্যাটাস পাওয়া যায়নি: ' + e.message);
+                }
+              }}
+              className="px-2.5 py-1 text-[11px] bg-white border border-slate-300 rounded font-semibold hover:bg-slate-100 flex items-center gap-1"
+            >
+              <RefreshCw className="w-3 h-3 text-slate-600" />
+              <span>DB সংযোগ পরীক্ষা</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+            <div className="p-2 bg-white rounded border border-slate-200">
+              <span className="text-slate-500 block">DB হোস্ট (Host):</span>
+              <strong className="font-mono text-slate-900">localhost</strong>
+            </div>
+            <div className="p-2 bg-white rounded border border-slate-200">
+              <span className="text-slate-500 block">DB পোর্ট (Port):</span>
+              <strong className="font-mono text-slate-900">5432</strong>
+            </div>
+            <div className="p-2 bg-white rounded border border-slate-200">
+              <span className="text-slate-500 block">ডাটাবেজ নাম:</span>
+              <strong className="font-mono text-teal-900">hospital_residential</strong>
+            </div>
+            <div className="p-2 bg-white rounded border border-slate-200">
+              <span className="text-slate-500 block">ইউজার (User):</span>
+              <strong className="font-mono text-slate-900">postgres</strong>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            • এই ক্রেডেনশিয়ালগুলো সার্ভার এনভায়রনমেন্টে স্বয়ংক্রিয়ভাবে কনফিগার করা হয়েছে। সার্ভারে PostgreSQL চালু থাকলে তথ্যগুলো সরাসরি রিলেশনাল টেবিলে সংরক্ষিত হবে।
+          </p>
+        </div>
+
         {/* Hospital Multi-PC Deployment Guide */}
         <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
           <div className="flex items-center gap-2 font-bold text-slate-900">
